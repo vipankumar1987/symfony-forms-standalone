@@ -54,6 +54,10 @@ use Symfony\Component\Form\FormRenderer;
 use Symfony\Component\Form\FormRendererInterface;
 use Symfony\Component\Form\FormRendererEngineInterface;
 
+use Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderAdapter;
+use Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderInterface;
+
+use Symfony\Component\Form\Extension\Templating\TemplatingRendererEngine;
 // create a Session object from the HttpFoundation component
 $session = new Session();
 
@@ -138,41 +142,22 @@ $rootTheme = realpath(__DIR__ . '/Symfony/Bundle/FrameworkBundle/Resources');
 $templateNameParser = new StubTemplateNameParser($root, $rootTheme);
 $loader = new FilesystemLoader(array());
 
-class MyTemplateRenderer extends PhpEngine implements FormRendererEngineInterface
-{
-	public function setTheme(Symfony\Component\Form\FormView $formview, $theme)
-	{
-		
-	}
-	public function getResourceForBlockName(Symfony\Component\Form\FormView $view, $blockName)
-	{
-		
-	}
-	public function getResourceForBlockNameHierarchy(Symfony\Component\Form\FormView $view, array $blockNameHierarchy, $hierarchyLevel)
-	{
-		
-	}
-	public function getResourceHierarchyLevel(Symfony\Component\Form\FormView $view, array $blockNameHierarchy, $hierarchyLevel)
-	{
-		
-	}
-	public function renderBlock(Symfony\Component\Form\FormView $view, $resource, $blockName, array $variables = array())
-	{
-		
-	}
-}
-$engine = new FormRenderer(new MyTemplateRenderer($templateNameParser, $loader));
+$defaultThemes = array();
+$csrfTokenManager = $csrfManager;//new CsrfProviderAdapter($csrfTokenManager);
+$engine = new PhpEngine($templateNameParser, $loader);
+$form_helper = new FormHelper(new FormRenderer(new TemplatingRendererEngine($engine, $defaultThemes), $csrfTokenManager));
+
 /**
  * This helper will help rendering form items
  */
-$form_helper = new FormHelper($engine, array(
+/*$form_helper = new FormHelper($engine, array(
     'FrameworkBundle:Form',
 ));
-/*$engine->setHelpers(array(
-    $form_helper,
-    new TranslatorHelper(new Translator($locale, new MessageSelector())),
-));
 */
+$engine->setHelpers(array(
+    $form_helper
+));
+
 $form_view = $form->createView();
 ?>
 
